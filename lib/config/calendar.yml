@@ -1,0 +1,34 @@
+:calendar:
+  :service: cl
+
+  :headers:
+    GData-Version: "2"
+
+  :action_subs:
+    :feed_basic: ":feed:/calendar/feeds"
+    :service: cl
+    :auth: https://www.google.com
+    :feed: https://www.google.com
+    
+  :action_hash:
+    :domain_login:
+      :method: :post
+      :path: ":auth:/accounts/ClientLogin"
+      :format: :text
+    :retrieve_users_calendars:
+      :method: :get
+      :path: ":feed_basic:/:username:/allcalendars/full"
+      :feed: true
+      :class: GoogleAppsApi::CalendarEntry
+    :retrieve_users_own_calendars:
+      :method: :get
+      :path: ":feed_basic:/:username:/owncalendars/full"  
+      :feed: true
+      :class: GoogleAppsApi::CalendarEntry
+    :add_calendar_to_user:
+      :method: :post
+      :path: ":feed_basic:/:username:/allcalendars/full"
+    :delete_calendar_from_user:
+      :method: :delete
+      :path: ":feed_basic:/:username:/allcalendars/full/:id:"
+    
