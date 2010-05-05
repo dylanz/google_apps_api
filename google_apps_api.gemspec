@@ -23,8 +23,27 @@ Gem::Specification.new do |s|
      "README.rdoc",
      "Rakefile",
      "VERSION",
+     "google_apps_api.gemspec",
+     "lib/config/calendar.yml",
+     "lib/config/provisioning.yml",
      "lib/google_apps_api.rb",
-     "test/helper.rb"
+     "lib/google_apps_api/base_api.rb",
+     "lib/google_apps_api/calendar.rb",
+     "lib/google_apps_api/calendar_resources.rb",
+     "lib/google_apps_api/contacts.rb",
+     "lib/google_apps_api/exceptions.rb",
+     "lib/google_apps_api/provisioning.rb",
+     "lib/google_apps_api/user_profiles.rb",
+     "lib/load_config.rb",
+     "private/gapps-config.yml",
+     "private/userscalendars.xml",
+     "test/google_apps_api-calendar_resources_test.rb",
+     "test/google_apps_api_calendar_test.rb",
+     "test/google_apps_api_contacts_test.rb",
+     "test/google_apps_api_provisioning_test.rb",
+     "test/google_apps_api_user_profiles_test.rb",
+     "test/helper.rb",
+     "test/test_helper.rb"
   ]
   s.homepage = %q{http://github.com/tastyhat/google_apps_api}
   s.rdoc_options = ["--charset=UTF-8"]
