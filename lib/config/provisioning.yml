@@ -12,25 +12,32 @@
       :method: :post
       :path: ":auth:/accounts/ClientLogin"
       :format: :text
+
     :rename_user:
       :method: :put
       :path: ":path_user:/:username:"
+
     :delete_user:
       :method: :delete
       :path: ":path_user:/:username:"
+
     :create_user:
       :method: :post
       :path: ":path_user:"
+      :format: GoogleAppsApi::UserEntity
+
     :retrieve_user:
       :method: :get
       :path: ":path_user:/:username:"
-      :class: GoogleAppsApi::UserEntry
+      :format: GoogleAppsApi::UserEntity
+
     :retrieve_all_users:
       :method: :get
       :path: ":path_user:"
       :feed: true
-      :class: GoogleAppsApi::UserEntry
+      :format: GoogleAppsApi::UserEntity
+
     :update_user:
       :method: :put
       :path: ":path_user:/:username:"
-      :format: :text
+      :format: GoogleAppsApi::UserEntity

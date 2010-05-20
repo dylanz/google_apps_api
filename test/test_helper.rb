@@ -9,6 +9,11 @@ require 'google_apps_api'
 
 class Test::Unit::TestCase
   
+  def assert_false(object, message="")
+    assert_equal(false, object, message)
+  end
+  
+  
   def random_letters(num, prefix = "", suffix = "")
     prefix + (0...num).map{65.+(rand(25)).chr}.join + suffix
   end

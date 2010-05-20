@@ -15,20 +15,44 @@
       :method: :post
       :path: ":auth:/accounts/ClientLogin"
       :format: :text
-    :retrieve_users_calendars:
+    :retrieve_acls_for_calendar:
+      :method: :get
+      :path: ":feed_basic:/:calendar:/acl/full"
+      :format: GoogleAppsApi::CalendarEntry
+      :feed: true
+    :retrieve_calendars_for_user:
       :method: :get
       :path: ":feed_basic:/:username:/allcalendars/full"
       :feed: true
-      :class: GoogleAppsApi::CalendarEntry
-    :retrieve_users_own_calendars:
+      :format: GoogleAppsApi::CalendarEntry
+    :retrieve_calendars_owned_by_user:
       :method: :get
       :path: ":feed_basic:/:username:/owncalendars/full"  
       :feed: true
-      :class: GoogleAppsApi::CalendarEntry
+      :format: GoogleAppsApi::CalendarEntry
     :add_calendar_to_user:
       :method: :post
       :path: ":feed_basic:/:username:/allcalendars/full"
+      :format: GoogleAppsApi::CalendarEntry
     :delete_calendar_from_user:
       :method: :delete
-      :path: ":feed_basic:/:username:/allcalendars/full/:id:"
+      :path: ":feed_basic:/:username:/allcalendars/full/:calendar:"
+      :format: :text
+    :create_calendar_acl_for_user:
+      :method: :post
+      :path: ":feed_basic:/:calendar:/acl/full"  
+      :format: GoogleAppsApi::CalendarEntry
+    :retrieve_calendar_acl_for_user:
+      :method: :get
+      :path: ":feed_basic:/:calendar:/acl/full/:scope_type:%3a:scope_id:"  
+      :format: GoogleAppsApi::CalendarAclEntry
+    :remove_calendar_acl_for_user:
+      :method: :delete
+      :path: ":feed_basic:/:calendar:/acl/full/user%3a:username:"  
+      :format: :text
+    :update_calendar_acl_for_user:
+      :method: :put
+      :path: ":feed_basic:/:calendar:/acl/full/user%3a:username:"  
+      :format: :text
+      
     

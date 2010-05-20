@@ -16,9 +16,9 @@ class GoogleAppsApiProvisioningTest < Test::Unit::TestCase
     should "be able to retrieve user" do
       resp = @api.retrieve_user("jws2135")
       
-      assert_kind_of UserEntry, resp
+      assert_kind_of UserEntity, resp
       
-      assert_equal resp.username, "jws2135"
+      assert_equal resp.id, "jws2135"
     end
     
     should "throw an error if given an invalid user" do
@@ -44,7 +44,7 @@ class GoogleAppsApiProvisioningTest < Test::Unit::TestCase
       ue = UserEntry.new()
       @api.create_user(uid, :given_name => random_letters(5), :family_name => random_letters(5), :password => random_letters(10))
      
-      assert_kind_of UserEntry, @api.retrieve_user(uid)
+      assert_kind_of UserEntity, @api.retrieve_user(uid)
       
       @api.delete_user(uid)
 

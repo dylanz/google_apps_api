@@ -1,7 +1,6 @@
-include REXML
-
 module GoogleAppsApi
   class BaseApi
+
 
 
     def initialize(api_name, *args)
@@ -9,43 +8,35 @@ module GoogleAppsApi
       options = args.extract_options!.merge!(api_config)
       raise("Must supply admin_user") unless options[:admin_user] 
       raise("Must supply admin_password") unless options[:admin_password]
-      raise("Must supply domain") unless options[:domain]
+      @domain = options[:domain] || raise("Must supply domain") 
       @actions_hash = options[:action_hash] || raise("Must supply action hash")
       @actions_subs = options[:action_subs] || raise("Must supply action subs")
       @actions_hash[:next] = [:get, '']
-      @actions_subs[:domain] = options[:domain]
+      @actions_subs[:domain] = @domain
 
-      @token = login(options[:admin_user], options[:domain], options[:admin_password], options[:service])
+      @token = login(options[:admin_user], @domain, options[:admin_password], options[:service])
       @headers = {'Content-Type'=>'application/atom+xml', 'Authorization'=> 'GoogleLogin auth='+@token}.merge(options[:headers] || {})
 
     end
 
-    def method_missing(method, *args, &block)
-      if @actions_hash.has_key?(method.to_sym)
-        request(method.to_sym, *args)
-      end
+
+    def entity(*args)
+      entity.merge(:domain => @domain)
     end
+
 
     private
 
-    def setup_action(*args)
-      options = args.extract_options!
-      actions = options[:action_hash]
-
-      actions.each_pair do |k,v|
-        actions[k] = {:method => v[0], :path => (v[1].to_s.gsub!(/\:([^\:]+)\:/) { |sub| options[sub.gsub(/\:/,"").to_sym] })}
-      end
-
-      return actions
-    end
-
     def login(username, domain, password, service)
+      @gsession_id = nil
       request_body = '&Email='+CGI.escape(username + "@" + domain)+'&Passwd='+CGI.escape(password)+'&accountType=HOSTED&service='+ service + '&source=columbiaUniversity-google_apps_api-0.1'
       res = request(:domain_login, :headers =>  {'Content-Type'=>'application/x-www-form-urlencoded'}, :body => request_body)
 
 
       return /^Auth=(.+)$/.match(res.to_s)[1]
     end
+    
+    
 
     def request(action, *args)
       options = args.extract_options!
@@ -54,33 +45,49 @@ module GoogleAppsApi
       
       subs_hash = @actions_subs.merge(options)
       subs_hash.each { |k,v| subs_hash[k] = action_gsub(v, subs_hash) if v.kind_of?(String)}
-
+      
       method = action_hash[:method]
       path = action_gsub(action_hash[:path], subs_hash) + options[:query].to_s
       is_feed = action_hash[:feed]
-      feed_class = action_hash[:class].constantize if action_hash[:class]
-      format = action_hash[:format] || :xml
+      format = options[:return_format] || action_hash[:format] || :xml
+      format = format.constantize unless [:xml, :text].include?(format) || format.kind_of?(Class)
+      
+      
+      if options[:debug]
+        puts "method: #{method}"
+        puts "path: #{path}"
+        puts "body: #{options[:body]}"
+        puts "headers: #{options[:headers]}"
+        puts "---\n"
+      end
+      
       response = http_request(method, path, options[:body], options[:headers])
+
+      if options[:debug]
+        puts response.body.content
+        puts "\n\n"
+      end
 
       if format == :text
         return response.body.content
       else
         begin 
-          xml = Nokogiri::XML(response.body.content) { |c| c.strict}
+          xml = Nokogiri::XML(response.body.content) { |c| c.strict.noent}
           test_errors(xml)
-          if is_feed
-            entries = entryset(xml.css('feed>entry'),feed_class)
+          
+          if format == :xml || !is_feed
+            format.kind_of?(Class) ? format.new(:xml => xml) : xml
+          else
+            entries = entryset(xml.css('feed>entry'), format)
 
           
             while (next_feed = xml.at_css('feed>link[rel=next]'))
               response = http_request(:get, next_feed.attribute("href").to_s, nil, options[:headers])
               xml = Nokogiri::XML(response.body.content) { |c| c.strict}
-              entries += entryset(xml.css('feed>entry'),feed_class)
+              entries += entryset(xml.css('feed>entry'),format)
             end
               
             entries
-          else
-            feed_class ? feed_class.new(xml) : xml
           end
         
 
@@ -88,8 +95,8 @@ module GoogleAppsApi
           error = GDataError.new()
           error.code = "SyntaxError"
           error.input = "path: #{path}"
-          error.reason = "XML expected, syntax error"
-          raise error, e.to_s
+          error.reason = "Non-XML Content: #{response.body.content}"
+          raise error, error.inspect
         end
       end
     end
@@ -97,15 +104,25 @@ module GoogleAppsApi
     def http_request(method, path, body, headers, redirects = 0)
       @hc ||= HTTPClient.new
       
+      path_with_gsession = path
+      
+      if @gsession_id && redirects == 0
+        operator = path.include?("?") ? "&" : "?"
+        path_with_gsession += "#{operator}gsessionid=#{@gsession_id.to_s}"
+      end
+      
       response = case method
       when :delete
-        @hc.send(method, path, headers)
+        @hc.send(method, path_with_gsession, headers)
       else
-        @hc.send(method, path, body, headers)
+        @hc.send(method, path_with_gsession, body, headers)
       end
       
       if response.status_code == 302 && (redirects += 1) < 10
-        response = http_request(method, response.header["Location"], body, headers, requests)
+        new_loc = response.header["Location"].to_s
+        gsession_match = new_loc.match(/gsessionid=([\w\-_]+)/)
+        @gsession_id = gsession_match[1].to_s if gsession_match
+        response = http_request(method, new_loc, body, headers, redirects)
       end
       return response
     end
@@ -128,8 +145,8 @@ module GoogleAppsApi
       end
     end
 
-    def entryset(entries, feed_class)
-      feed_class ? entries.collect { |en| feed_class.new(en)} : entries
+    def entryset(entries, return_class)
+      return_class ? entries.collect { |en| return_class.new(:xml => en)} : entries
     end
 
     def escapeXML(text)
@@ -148,10 +165,66 @@ module GoogleAppsApi
 
   end
   
+  
+  
+
+  class Entity
+    VALID_ENTITY_TYPES = [:user, :calendar]
+    
+    attr_reader :kind, :id, :domain
+    def initialize(*args)
+      options = args.extract_options!
+
+      @kind = options.delete(:kind)
+      @id = options.delete(:id)
+      @domain = options.delete(:domain)
+    
+      if (kind = options.keys.detect { |k| VALID_ENTITY_TYPES.include?(k)})
+        @kind = kind.to_s
+      
+        value = CGI::unescape(options[kind])
+        
+        if value.include?("@")
+          @id, @domain = value.split("@",2)
+        else
+          @id = value
+        end
+      end
+      
+      def full_id
+        @id + "@" + @domain
+      end
+      
+      def full_id_escaped
+        CGI::escape(full_id)
+      end
+      
+
+      raise(ArgumentError, "Kind and Id and Domain must be specified") unless @kind && @id && @domain
+    end
+    
+    def <=>(other)
+      [kind, id, domain] <=> [other.kind, other.id, other.domain]
+    end
+    
+    def ==(other)
+      (self <=> other) == 0
+    end
+  end
+  
 	class GDataError < RuntimeError
 		attr_accessor :code, :input, :reason
 		
 		def initialize()
+		end
+		
+		def to_s
+		  "#{code}: #{reason}"
+		end
+		
+		def inspect
+		  "#{code}: #{reason}"
+		  
 		end
 	end
 end
