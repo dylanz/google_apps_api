@@ -33,9 +33,8 @@ class GoogleAppsApiCalendarTest < Test::Unit::TestCase
 
         base_cal = all_cals.first
 
-        assert_kind_of CalendarEntry, base_cal
-        assert_equal base_cal.entity.name, @u1.to_url
-        assert_equal base_cal.role, "owner"
+        assert_kind_of CalendarEntity, base_cal
+        assert_equal base_cal.full_id, @u1.full_id # base_calendar
       end
 
       # 
@@ -57,27 +56,27 @@ class GoogleAppsApiCalendarTest < Test::Unit::TestCase
       #   
       # end
 
-      should "be able to retrieve a calendar's acl" do
-        cals = @c_api.retrieve_calendars_for_user(@u1)
-        u1_cal = cals.detect { |c| c.calendar_id == @u1.to_url }
-
-        assert u1_cal
-
-        acls = @c_api.retrieve_acls_for_calendar(u1_cal)        
-        assert_nil acls.detect { |a| a.entity == @u2.to_entity }
-        
-        
-        u2_freebusy_u1 = CalendarEntry.new(:entity => @u2.to_entity, :calendar_id => u1_cal.calendar_id, :role => "freebusy")
-        
-        @c_api.create_calendar_entry_acl(u2_freebusy_u1)
-        
-
-        acls_after = @c_api.retrieve_acls_for_calendar(u1_cal)        
-        assert_nil acls_after.detect { |a| a.entity == @u2.to_entity }
-        
-      end
-      
-        
+    #   should "be able to retrieve a calendar's acl" do
+    #     cals = @c_api.retrieve_calendars_for_user(@u1)
+    #     u1_cal = cals.detect { |c| c.calendar_id == @u1.to_url }
+    # 
+    #     assert u1_cal
+    # 
+    #     acls = @c_api.retrieve_acls_for_calendar(u1_cal)        
+    #     assert_nil acls.detect { |a| a.entity == @u2.to_entity }
+    #     
+    #     
+    #     u2_freebusy_u1 = CalendarEntry.new(:entity => @u2.to_entity, :calendar_id => u1_cal.calendar_id, :role => "freebusy")
+    #     
+    #     @c_api.create_calendar_entry_acl(u2_freebusy_u1)
+    #     
+    # 
+    #     acls_after = @c_api.retrieve_acls_for_calendar(u1_cal)        
+    #     assert_nil acls_after.detect { |a| a.entity == @u2.to_entity }
+    #     
+    #   end
+    #   
+    #     
     end
     
     

@@ -191,18 +191,19 @@ module GoogleAppsApi
         end
       end
       
-      def full_id
-        @id + "@" + @domain
-      end
-      
-      def full_id_escaped
-        CGI::escape(full_id)
-      end
-      
 
       raise(ArgumentError, "Kind and Id and Domain must be specified") unless @kind && @id && @domain
     end
     
+    def full_id
+      @id + "@" + @domain
+    end
+    
+    def full_id_escaped
+      CGI::escape(full_id)
+    end
+
+
     def <=>(other)
       [kind, id, domain] <=> [other.kind, other.id, other.domain]
     end
