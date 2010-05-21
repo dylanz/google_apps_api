@@ -63,18 +63,17 @@ module GoogleAppsApi
       
       response = http_request(method, path, options[:body], options[:headers])
 
-      if options[:debug]
-        puts response.body.content
-        puts "\n\n"
-      end
-
       if format == :text
+        puts response.body.content if options[:debug]
         return response.body.content
       else
         begin 
           xml = Nokogiri::XML(response.body.content) { |c| c.strict.noent}
+
           test_errors(xml)
+          puts xml.to_s if options[:debug]
           
+                    
           if format == :xml || !is_feed
             format.kind_of?(Class) ? format.new(:xml => xml) : xml
           else
@@ -92,6 +91,8 @@ module GoogleAppsApi
         
 
         rescue Nokogiri::XML::SyntaxError  => e
+          puts response.body.content if options[:debug]
+
           error = GDataError.new()
           error.code = "SyntaxError"
           error.input = "path: #{path}"
@@ -169,7 +170,7 @@ module GoogleAppsApi
   
 
   class Entity
-    VALID_ENTITY_TYPES = [:user, :calendar]
+    VALID_ENTITY_TYPES = [:user, :calendar, :domain]
     
     attr_reader :kind, :id, :domain
     def initialize(*args)
@@ -179,7 +180,7 @@ module GoogleAppsApi
       @id = options.delete(:id)
       @domain = options.delete(:domain)
     
-      if (kind = options.keys.detect { |k| VALID_ENTITY_TYPES.include?(k)})
+      if (kind = options.keys.detect { |k| VALID_ENTITY_TYPES.include?(k.to_sym)})
         @kind = kind.to_s
       
         value = CGI::unescape(options[kind])
@@ -192,24 +193,28 @@ module GoogleAppsApi
       end
       
 
-      raise(ArgumentError, "Kind and Id and Domain must be specified") unless @kind && @id && @domain
+      raise(ArgumentError, "Kind and Id must be specified") unless @kind && @id
     end
     
     def full_id
-      @id + "@" + @domain
+      @id + (@domain.nil? ? "" : "@" + @domain)
     end
     
     def full_id_escaped
       CGI::escape(full_id)
     end
-
-
-    def <=>(other)
-      [kind, id, domain] <=> [other.kind, other.id, other.domain]
+    
+    def qualified_id
+      @kind + ":" + full_id
     end
     
+    def qualified_id_escaped
+      CGI::escape(qualified_id)
+    end
+
+
     def ==(other)
-      (self <=> other) == 0
+      other.kind_of?(Entity) && @kind == other.kind && @id == other.id && @domain == other.domain
     end
   end
   

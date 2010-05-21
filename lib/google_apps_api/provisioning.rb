@@ -95,8 +95,20 @@ module GoogleAppsApi #:nodoc:
         @agreed_to_terms = xml.at_css("apps|login").attribute("agreedToTerms").content
         @quota_limit = xml.at_css("apps|quota").attribute("limit").content
       else
-        super(*args)
+        if args.first.kind_of?(String)
+          super(:user => args.first)
+        else
+          super(options.merge(:kind => "user"))
+        end
       end
+    end
+    
+    def entity_for_base_calendar
+      CalendarEntity.new(self.full_id)
+    end
+    
+    def get_calendars(c_api, *args)
+      c_api.retrieve_calendars_for_user(self, *args)
     end
   end
 end

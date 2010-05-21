@@ -41,7 +41,6 @@ class GoogleAppsApiProvisioningTest < Test::Unit::TestCase
        @api.retrieve_user(uid)
       end
       
-      ue = UserEntry.new()
       @api.create_user(uid, :given_name => random_letters(5), :family_name => random_letters(5), :password => random_letters(10))
      
       assert_kind_of UserEntity, @api.retrieve_user(uid)

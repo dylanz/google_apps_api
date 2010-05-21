@@ -18,7 +18,7 @@
     :retrieve_acls_for_calendar:
       :method: :get
       :path: ":feed_basic:/:calendar:/acl/full"
-      :format: GoogleAppsApi::CalendarEntity
+      :format: GoogleAppsApi::CalendarAcl
       :feed: true
     :retrieve_calendars_for_user:
       :method: :get
@@ -34,25 +34,25 @@
       :method: :post
       :path: ":feed_basic:/:username:/allcalendars/full"
       :format: GoogleAppsApi::CalendarEntity
-    :delete_calendar_from_user:
+    :remove_calendar_from_user:
       :method: :delete
       :path: ":feed_basic:/:username:/allcalendars/full/:calendar:"
       :format: :text
-    :create_calendar_acl_for_user:
+    :create_calendar_acl:
       :method: :post
       :path: ":feed_basic:/:calendar:/acl/full"  
-      :format: GoogleAppsApi::CalendarEntity
+      :format: GoogleAppsApi::CalendarAcl
     :retrieve_calendar_acl_for_user:
       :method: :get
       :path: ":feed_basic:/:calendar:/acl/full/:scope_type:%3a:scope_id:"  
-      :format: GoogleAppsApi::CalendarAclEntity
-    :remove_calendar_acl_for_user:
+      :format: GoogleAppsApi::CalendarAcl
+    :remove_calendar_acl:
       :method: :delete
-      :path: ":feed_basic:/:calendar:/acl/full/user%3a:username:"  
+      :path: ":feed_basic:/:calendar:/acl/full/:scope:"  
       :format: :text
-    :update_calendar_acl_for_user:
+    :set_calendar_acl:
       :method: :put
-      :path: ":feed_basic:/:calendar:/acl/full/user%3a:username:"  
-      :format: :text
+      :path: ":feed_basic:/:calendar:/acl/full/:scope:"  
+      :format: GoogleAppsApi::CalendarAcl
       
     
