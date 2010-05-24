@@ -1,0 +1,35 @@
+:contacts:
+  :service: cp
+
+  :headers:
+    GData-Version: "2"
+
+  :action_subs:
+    :service: cl
+    :auth: https://www.google.com
+    :feed: https://www.google.com/m8/feeds/contacts
+    
+  :action_hash:
+    :domain_login:
+      :method: :post
+      :path: ":auth:/accounts/ClientLogin"
+      :format: :text
+    :retrieve_all_contacts:
+      :method: :get
+      :path: ":feed:/:domain:/full"
+      :feed: true
+      :format: GoogleAppsApi::ContactEntity
+    :retrieve_contact:
+      :method: :get
+      :path: ":feed:/:domain:/full/:contact:"
+      :format: GoogleAppsApi::ContactEntity
+    :create_contact:
+      :method: :post
+      :path: ":feed:/:domain:/full"
+      :format: GoogleAppsApi::ContactEntity
+    :remove_contact:
+      :method: :delete
+      :path: ":feed:/:domain:/full/:contact:"
+      :format: GoogleAppsApi::ContactEntity
+      
+    

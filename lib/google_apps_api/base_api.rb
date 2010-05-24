@@ -170,7 +170,7 @@ module GoogleAppsApi
   
 
   class Entity
-    VALID_ENTITY_TYPES = [:user, :calendar, :domain]
+    VALID_ENTITY_TYPES = [:user, :calendar, :domain, :contact]
     
     attr_reader :kind, :id, :domain
     def initialize(*args)

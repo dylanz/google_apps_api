@@ -8,6 +8,7 @@ class GoogleAppsApiBaseApiTest < Test::Unit::TestCase
       @en = Entity.new(:kind => "user", :id => "test1", :domain => "ocelot.cul.columbia.edu")
       @c_en = Entity.new(:kind => "calendar", :id => "js235", :domain => "ocelot.cul.columbia.edu")
       @d_en = Entity.new(:kind => "domain", :id => "ocelot.cul.columbia.edu")
+      @co_en = Entity.new(:kind => "contact", :id => "12345")
     end
 
 
@@ -69,7 +70,6 @@ class GoogleAppsApiBaseApiTest < Test::Unit::TestCase
       assert_equal "user%3Atest1%40ocelot.cul.columbia.edu", @en.qualified_id_escaped
       assert_equal "domain:ocelot.cul.columbia.edu", @d_en.qualified_id
       assert_equal "domain%3Aocelot.cul.columbia.edu", @d_en.qualified_id_escaped
-      
     end
   end
   

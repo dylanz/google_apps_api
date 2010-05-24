@@ -211,10 +211,10 @@ class GoogleAppsApiCalendarTest < Test::Unit::TestCase
         @c_api.remove_calendar_from_user(u1_cal, @u3)
       
         @c_api.set_calendar_for_user(u1_cal, @u3, :accesslevel => "editor", :hidden => true, :selected => false)
-      
+  
         u1_cal_u3 = @c_api.retrieve_calendar_for_user(u1_cal, @u3)
 
-        assert  u1_cal_u3
+        assert u1_cal_u3
         assert_equal u1_cal_u3.details[:accesslevel], "editor"
         assert_false u1_cal_u3.details[:selected]
         assert u1_cal_u3.details[:hidden]

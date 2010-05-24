@@ -1,0 +1,4 @@
+apps_ocelot:
+  domain: ocelot.cul.columbia.edu
+  admin_user: adminuserhere
+  admin_password: adminpasswordhere
