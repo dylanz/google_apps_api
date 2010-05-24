@@ -231,6 +231,17 @@ class GoogleAppsApiCalendarTest < Test::Unit::TestCase
       end
       
 
+      should "be able to set a title for a calendar via set_calendar" do
+        @c_api.set_calendar_for_user(@u1.entity_for_base_calendar, @u1, :title => "User 1 Calendar")
+        
+        assert_equal @u1.get_base_calendar(@c_api).details[:title], "User 1 Calendar"
+
+        @c_api.set_calendar_for_user(@u1.entity_for_base_calendar, @u1, :title => "__user1@ocelot.cul.columbia.edu")
+
+
+        assert_equal @u1.get_base_calendar(@c_api).details[:title], "__user1@ocelot.cul.columbia.edu"
+
+      end
 
     end
 
