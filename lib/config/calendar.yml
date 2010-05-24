@@ -15,19 +15,17 @@
       :method: :post
       :path: ":auth:/accounts/ClientLogin"
       :format: :text
-    :retrieve_acls_for_calendar:
+    :retrieve_calendar_for_user:
       :method: :get
-      :path: ":feed_basic:/:calendar:/acl/full"
-      :format: GoogleAppsApi::CalendarAcl
-      :feed: true
+      :path: ":feed_basic:/:username:/allcalendars/full/:calendar:"
+      :format: GoogleAppsApi::CalendarEntity
+    :update_calendar_for_user:
+      :method: :put
+      :path: ":feed_basic:/:username:/allcalendars/full/:calendar:"
+      :format: GoogleAppsApi::CalendarEntity
     :retrieve_calendars_for_user:
       :method: :get
       :path: ":feed_basic:/:username:/allcalendars/full"
-      :feed: true
-      :format: GoogleAppsApi::CalendarEntity
-    :retrieve_calendars_owned_by_user:
-      :method: :get
-      :path: ":feed_basic:/:username:/owncalendars/full"  
       :feed: true
       :format: GoogleAppsApi::CalendarEntity
     :add_calendar_to_user:
@@ -38,21 +36,26 @@
       :method: :delete
       :path: ":feed_basic:/:username:/allcalendars/full/:calendar:"
       :format: :text
+    :retrieve_calendar_acl_for_user:
+      :method: :get
+      :path: ":feed_basic:/:calendar:/acl/full/:scope_type:%3a:scope_id:"  
+      :format: GoogleAppsApi::CalendarAcl
+    :retrieve_acls_for_calendar:
+      :method: :get
+      :path: ":feed_basic:/:calendar:/acl/full"
+      :format: GoogleAppsApi::CalendarAcl
+      :feed: true
     :create_calendar_acl:
       :method: :post
       :path: ":feed_basic:/:calendar:/acl/full"  
       :format: GoogleAppsApi::CalendarAcl
-    :retrieve_calendar_acl_for_user:
-      :method: :get
-      :path: ":feed_basic:/:calendar:/acl/full/:scope_type:%3a:scope_id:"  
+    :set_calendar_acl:
+      :method: :put
+      :path: ":feed_basic:/:calendar:/acl/full/:scope:"  
       :format: GoogleAppsApi::CalendarAcl
     :remove_calendar_acl:
       :method: :delete
       :path: ":feed_basic:/:calendar:/acl/full/:scope:"  
       :format: :text
-    :set_calendar_acl:
-      :method: :put
-      :path: ":feed_basic:/:calendar:/acl/full/:scope:"  
-      :format: GoogleAppsApi::CalendarAcl
       
     

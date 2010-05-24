@@ -107,6 +107,10 @@ module GoogleAppsApi #:nodoc:
       CalendarEntity.new(self.full_id)
     end
     
+    def get_base_calendar(c_api, *args)
+      c_api.retrieve_calendar_for_user(self.entity_for_base_calendar, self, *args)
+    end
+    
     def get_calendars(c_api, *args)
       c_api.retrieve_calendars_for_user(self, *args)
     end

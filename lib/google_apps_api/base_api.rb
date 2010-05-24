@@ -96,7 +96,7 @@ module GoogleAppsApi
           error = GDataError.new()
           error.code = "SyntaxError"
           error.input = "path: #{path}"
-          error.reason = "Non-XML Content: #{response.body.content}"
+          error.reason = "#{response.body.content}"
           raise error, error.inspect
         end
       end

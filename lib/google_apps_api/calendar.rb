@@ -9,11 +9,41 @@ module GoogleAppsApi #:nodoc:
       def initialize(*args)
         super(:calendar, *args)
       end
+      
+      def set_calendar_for_user(calendar, user, *args)
+        options = args.extract_options!
+        
+        existing_acl = "none"
+        need_to_create = false
+        
+        cal = retrieve_calendar_for_user(calendar, user)
+        if cal
+          existing_acl = cal.details[:accesslevel]
+        else
+          need_to_create = true
+        end
+        
+        acl = options.delete(:accesslevel) || existing_acl
 
-      # def retrieve_user_settings(username, *args)
-      #     options = args.extract_options!.merge(:username => username)
-      #     xml_response = request(:retrieve_user_settings, options) 
-      #   end
+        if need_to_create
+          raise "Must set accesslevel for a newly added calendar" unless acl
+          owner_acl = CalendarAcl.new(:calendar => calendar, :scope => user, :role => "owner")
+          set_calendar_acl(owner_acl)
+          add_calendar_to_user(calendar, user)
+          
+        end
+        
+        if acl == "none" 
+          remove_calendar_from_user(calendar, user) unless existing_acl == "none"
+        else
+
+          if acl != existing_acl
+            set_calendar_acl(CalendarAcl.new(:calendar => calendar, :scope => user, :role => acl))
+          end
+          update_calendar_for_user(calendar, user, options) unless options.empty?
+          
+        end
+      end
 
       def add_calendar_to_user(calendar, user, *args)
         req = <<-DESCXML
@@ -32,11 +62,63 @@ module GoogleAppsApi #:nodoc:
         request(:remove_calendar_from_user, options)
       end
 
+
+      def update_calendar_for_user(calendar, user, *args)
+
+        username = user.full_id_escaped
+
+        cal = nil
+        cal = retrieve_calendar_for_user(calendar, user) 
+        
+        cal_id = cal.full_id_escaped
+
+        options = args.extract_options!.merge(:username => username, :calendar => cal_id)
+        
+        details = cal.details.merge(options)
+
+
+        req = <<-DESCXML
+        <entry xmlns='http://www.w3.org/2005/Atom' xmlns:gCal='http://schemas.google.com/gCal/2005' xmlns:gd='http://schemas.google.com/g/2005'>
+          <id>http://www.google.com/calendar/feeds/#{username}/allcalendars/full/#{cal_id}</id>
+      
+          <title type='text'>#{details[:title]}</title>
+          <summary type='text'>#{details[:summary]}</summary>
+          <gCal:timezone value='#{details[:timezone]}'/>
+          <gCal:hidden value='#{details[:hidden].to_s}'/>
+          <gCal:color value='#{details[:color]}'/>
+          <gCal:selected value='#{details[:selected].to_s}'/>
+          <gd:where valueString='#{details[:where]}'/>
+        </entry>
+
+        DESCXML
+        
+        options[:body] = req.strip
+        request(:update_calendar_for_user, options)
+      end
+
       # lists all calendards for a user
       def retrieve_calendars_for_user(user, *args)
         options = args.extract_options!.merge(:username => user.full_id_escaped)
         request(:retrieve_calendars_for_user, options)
       end
+
+      # lists all calendards for a user
+      def retrieve_calendar_for_user(calendar, user, *args)
+        options = args.extract_options!.merge(:calendar => calendar.full_id_escaped, :username => user.full_id_escaped)
+        retries = options[:retries] || 5
+
+        while (retries > 0)
+          begin
+            return request(:retrieve_calendar_for_user, options)
+          rescue GDataError => g
+            retries -= 1
+            sleep 0.5
+          end
+        end
+        
+        return nil
+      end
+
 
       # returns array of acls for a given calendar
       def retrieve_acls_for_calendar(calendar, *args)
@@ -68,6 +150,7 @@ module GoogleAppsApi #:nodoc:
         options = args.extract_options!.merge(:calendar => acl.calendar.full_id_escaped, :scope => acl.scope.qualified_id_escaped)
         request(:remove_calendar_acl, options)
       end
+      
       
       # updates a given acl for a given scope
       def set_calendar_acl(acl, *args)
@@ -134,7 +217,7 @@ module GoogleAppsApi #:nodoc:
 
 
   class CalendarEntity < Entity
-    
+    attr_reader :details
     
     def initialize(*args)
       @details = {}
@@ -154,20 +237,16 @@ module GoogleAppsApi #:nodoc:
       end
     end
     
-    def get_detail(key)
-      @details[key]
-    end
-    
     def ==(other)
       super(other)
     end
     
-    
-    # updates with details.
-    def refresh_details!(c_api, *args)
-      c_api.retrieve_calendar_details(self, *args)
-    end
-    
+    # 
+    # # updates with details.
+    # def refresh_details!(c_api, *args)
+    #   c_api.retrieve_calendar_details(self, *args)
+    # end
+    # 
     def get_acls(c_api, *args)
       c_api.retrieve_acls_for_calendar(self, *args)
     end
@@ -182,6 +261,16 @@ module GoogleAppsApi #:nodoc:
       when "calendar#calendar"
         @calendar_id = entry.at_css('id').content.gsub(/^.*calendars\//,"")
         @details[:title] = entry.at_css('title').content
+        @details[:summary] = entry.at_css('summary')
+        @details[:summary] = @details[:summary] ? @details[:summary].content : ""
+        @details[:timezone] = entry.at_css('gCal|timezone').attribute("value").content
+        @details[:accesslevel] = entry.at_css('gCal|accesslevel').attribute("value").content
+        @details[:where] = entry.at_css('gd|where')
+        @details[:where] = @details[:where] ? @details[:where].attribute("valueString").content : ""
+        @details[:color] = entry.at_css('gCal|color').attribute("value").content
+
+        @details[:hidden] = entry.at_css('gCal|hidden').attribute("value").content  == "true"
+        @details[:selected] = entry.at_css('gCal|selected').attribute("value").content == "true"
       when "calendar#acl"
         @calendar_id = entry.at_css('id').content.gsub(/^.*feeds\//,"").gsub(/\/acl.*$/,"")
       end
