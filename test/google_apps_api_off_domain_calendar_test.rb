@@ -20,7 +20,7 @@ class GoogleAppsApiOffDomainCalendarTest < Test::Unit::TestCase
         u1_cal = @u1.entity_for_base_calendar
         james_off = CalendarAcl.new(:calendar => u1_cal, :scope => UserEntity.new("apps.cul.columbia.edu_@domain.calendar.google.com"), :role => "read")
 
-        @c_api.set_calendar_acl(james_off, :debug => true)
+        @c_api.set_calendar_acl(james_off)
       end
     end
   end

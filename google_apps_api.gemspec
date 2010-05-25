@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{google_apps_api}
-  s.version = "0.1.0"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["James Stuart"]
@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
      "google_apps_api.gemspec",
      "lib/config/calendar.yml",
      "lib/config/contacts.yml",
+     "lib/config/profiles.yml",
      "lib/config/provisioning.yml",
      "lib/google_apps_api.rb",
      "lib/google_apps_api/base_api.rb",
@@ -41,6 +42,7 @@ Gem::Specification.new do |s|
      "test/google_apps_api_base_api_test.rb",
      "test/google_apps_api_calendar_test.rb",
      "test/google_apps_api_contacts_test.rb",
+     "test/google_apps_api_off_domain_calendar_test.rb",
      "test/google_apps_api_provisioning_test.rb",
      "test/google_apps_api_user_profiles_test.rb",
      "test/helper.rb",

@@ -29,7 +29,7 @@ class GoogleAppsApiContactsTest < Test::Unit::TestCase
     # 
     # 
     should "be able to retrieve all contacts" do
-      cons =  @co_api.retrieve_all_contacts(:debug => true)
+      cons =  @co_api.retrieve_all_contacts
       assert_kind_of Array, cons
       
     end
