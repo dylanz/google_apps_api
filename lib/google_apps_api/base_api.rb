@@ -41,6 +41,7 @@ module GoogleAppsApi
     def request(action, *args)
       options = args.extract_options!
       options = {:headers => @headers}.merge(options)
+      options[:headers] = (options[:headers] || {}).merge(options.delete(:merge_headers) || {})
       action_hash = @actions_hash[action] || raise("invalid action #{action} called")
       
       subs_hash = @actions_subs.merge(options)
@@ -194,6 +195,10 @@ module GoogleAppsApi
       
 
       raise(ArgumentError, "Kind and Id must be specified") unless @kind && @id
+    end
+    
+    def id_escaped
+      CGI::escape(@id)
     end
     
     def full_id

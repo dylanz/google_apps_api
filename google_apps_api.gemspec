@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["James Stuart"]
-  s.date = %q{2010-05-05}
+  s.date = %q{2010-05-25}
   s.description = %q{APIs for Google Apps (currently Provisioning, Calendar, Calendar Resources)}
   s.email = %q{tastyhat@jamesstuart.org}
   s.extra_rdoc_files = [
@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
      "VERSION",
      "google_apps_api.gemspec",
      "lib/config/calendar.yml",
+     "lib/config/contacts.yml",
      "lib/config/provisioning.yml",
      "lib/google_apps_api.rb",
      "lib/google_apps_api/base_api.rb",
@@ -35,9 +36,9 @@ Gem::Specification.new do |s|
      "lib/google_apps_api/provisioning.rb",
      "lib/google_apps_api/user_profiles.rb",
      "lib/load_config.rb",
-     "private/gapps-config.yml",
-     "private/userscalendars.xml",
+     "test/example_connection_config.yml",
      "test/google_apps_api-calendar_resources_test.rb",
+     "test/google_apps_api_base_api_test.rb",
      "test/google_apps_api_calendar_test.rb",
      "test/google_apps_api_contacts_test.rb",
      "test/google_apps_api_provisioning_test.rb",
@@ -52,8 +53,10 @@ Gem::Specification.new do |s|
   s.summary = %q{Various APIs for Google Apps}
   s.test_files = [
     "test/google_apps_api-calendar_resources_test.rb",
+     "test/google_apps_api_base_api_test.rb",
      "test/google_apps_api_calendar_test.rb",
      "test/google_apps_api_contacts_test.rb",
+     "test/google_apps_api_off_domain_calendar_test.rb",
      "test/google_apps_api_provisioning_test.rb",
      "test/google_apps_api_user_profiles_test.rb",
      "test/helper.rb",

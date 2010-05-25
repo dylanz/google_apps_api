@@ -20,6 +20,7 @@ class GoogleAppsApiCalendarTest < Test::Unit::TestCase
         assert @c_api.token
       end
       
+      
       should "be associated with only one calendar" do
         all_cals= @u1.get_calendars(@c_api)
         assert_kind_of Array, all_cals
@@ -167,6 +168,8 @@ class GoogleAppsApiCalendarTest < Test::Unit::TestCase
       
       
       end
+      
+      
 
       should "be able to update a calendar's selectedness and hiddenness for another user" do
         u1_cal = @u1.entity_for_base_calendar

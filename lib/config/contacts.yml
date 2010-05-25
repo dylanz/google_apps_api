@@ -30,6 +30,6 @@
     :remove_contact:
       :method: :delete
       :path: ":feed:/:domain:/full/:contact:"
-      :format: GoogleAppsApi::ContactEntity
+      :format: :text
       
     

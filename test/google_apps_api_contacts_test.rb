@@ -5,7 +5,7 @@ class GoogleAppsApiContactsTest < Test::Unit::TestCase
   
   context "given a connection to apps.cul" do
     setup do
-      gapps_config =YAML::load_file("private/gapps-config.yml")["apps_ocelot"].symbolize_keys!
+      gapps_config =YAML::load_file("private/gapps-config.yml")["apps_cul"].symbolize_keys!
       @co_api = Contacts::Api.new(gapps_config)
     end
 
@@ -31,13 +31,31 @@ class GoogleAppsApiContactsTest < Test::Unit::TestCase
     should "be able to retrieve all contacts" do
       cons =  @co_api.retrieve_all_contacts(:debug => true)
       assert_kind_of Array, cons
+      
     end
 
-    should "be able to create a contact" do
-      contact = ContactEntity.new(:id => "jws2135", :given_name => "James", :family_name => "Stuart", :emails => {:work => "james.stuart@columbia.edu", :home => "james.stuart@gmail.com"}, :primary_email => :work)
-      res =  @co_api.create_contact(contact, :debug => true)
+    # should "be able to remove all contacts" do
+    #   cons =  @co_api.retrieve_all_contacts
+    #   
+    #   cons.each do |con|
+    #     @co_api.remove_contact(con, :debug => true)
+    #   end
+    # end
 
-    end
+    # 
+    # should "be able to create a contact" do
+    #   contact = ContactEntity.new(:id => "_new_", :name => "Bizarre Test", :emails => {:work => "james.stuart+bizarretest@columbia.edu", :home => "james.stuart+bizarretest@gmail.com"}, :primary_email => :work)
+    #   res =  @co_api.create_contact(contact, :debug => true)
+    # 
+    #   assert_kind_of ContactEntity, res
+    # 
+    #   puts res.inspect
+    #   
+    #   # @co_api.remove_contact(res, :debug => true)
+    # 
+    # end
+    # 
+    
 
     # 
     # 
