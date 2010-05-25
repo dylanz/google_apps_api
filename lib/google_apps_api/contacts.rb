@@ -62,6 +62,16 @@ module GoogleAppsApi #:nodoc:
         @id = xml.at_css("id").content.gsub(/^.+\/base\//,"")
         @domain = xml.at_css("id").content.gsub(/^.+\/contacts\/([^\/]+)\/.+$/,"\\1")
         @name = xml.at_css("title").content
+        
+        xml.css("gd|email").each do |email_node|
+          loc = email_node.attribute("rel").content.gsub(/^.+\#/,"").to_sym
+          email = email_node.attribute("address").content
+          primary = email_node.attribute("primary") && email_node.attribute("primary").content == "true"
+          
+          @primary_email = loc if primary
+          @emails[loc] = email
+          
+        end
       else
         if args.first.kind_of?(String)
           super(:contact => args.first)

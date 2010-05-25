@@ -5,56 +5,29 @@ class GoogleAppsApiContactsTest < Test::Unit::TestCase
   
   context "given a connection to apps.cul" do
     setup do
-      gapps_config =YAML::load_file("private/gapps-config.yml")["apps_cul"].symbolize_keys!
+      gapps_config =YAML::load_file("private/gapps-config.yml")["apps_ocelot"].symbolize_keys!
       @co_api = Contacts::Api.new(gapps_config)
     end
 
     should "have a token" do
       assert @co_api.token
     end
-    # 
-    # should "be able to retrieve user" do
-    #   resp = @api.retrieve_user("jws2135")
-    #   
-    #   assert_kind_of UserEntity, resp
-    #   
-    #   assert_equal resp.id, "jws2135"
-    # end
-    # 
-    # should "throw an error if given an invalid user" do
-    #   assert_raises GDataError do
-    #     resp = @api.retrieve_user("xx_jws2135")
-    #   end
-    # end
-    # 
-    # 
+  
     should "be able to retrieve all contacts" do
       cons =  @co_api.retrieve_all_contacts
       assert_kind_of Array, cons
       
     end
-
-    # should "be able to remove all contacts" do
-    #   cons =  @co_api.retrieve_all_contacts
-    #   
-    #   cons.each do |con|
-    #     @co_api.remove_contact(con, :debug => true)
-    #   end
-    # end
-
-    # 
-    # should "be able to create a contact" do
-    #   contact = ContactEntity.new(:id => "_new_", :name => "Bizarre Test", :emails => {:work => "james.stuart+bizarretest@columbia.edu", :home => "james.stuart+bizarretest@gmail.com"}, :primary_email => :work)
-    #   res =  @co_api.create_contact(contact, :debug => true)
-    # 
-    #   assert_kind_of ContactEntity, res
-    # 
-    #   puts res.inspect
-    #   
-    #   # @co_api.remove_contact(res, :debug => true)
-    # 
-    # end
-    # 
+    
+    should "be able to create a contact" do
+      contact = ContactEntity.new(:id => "_new_", :name => "Bizarre Test", :emails => {:work => "james.stuart+bizarretest@columbia.edu", :home => "james.stuart+bizarretest@gmail.com"}, :primary_email => :work)
+      res =  @co_api.create_contact(contact)
+    
+      assert_kind_of ContactEntity, res
+      
+      @co_api.remove_contact(res)
+    end
+    
     
 
     # 
