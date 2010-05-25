@@ -1,6 +1,6 @@
 module GoogleAppsApi
   class BaseApi
-
+    attr_reader :domain
 
 
     def initialize(api_name, *args)
