@@ -6,9 +6,9 @@ module GoogleAppsApi
     def initialize(api_name, *args)
       api_config = GoogleAppsApi.config[api_name] || {}
       options = args.extract_options!.merge!(api_config)
-      raise("Must supply admin_user") unless options[:admin_user] 
+      raise("Must supply admin_user") unless options[:admin_user]
       raise("Must supply admin_password") unless options[:admin_password]
-      @domain = options[:domain] || raise("Must supply domain") 
+      @domain = options[:domain] || raise("Must supply domain")
       @actions_hash = options[:action_hash] || raise("Must supply action hash")
       @actions_subs = options[:action_subs] || raise("Must supply action subs")
       @actions_hash[:next] = [:get, '']
@@ -35,25 +35,24 @@ module GoogleAppsApi
 
       return /^Auth=(.+)$/.match(res.to_s)[1]
     end
-    
-    
+
+
 
     def request(action, *args)
       options = args.extract_options!
       options = {:headers => @headers}.merge(options)
       options[:headers] = (options[:headers] || {}).merge(options.delete(:merge_headers) || {})
       action_hash = @actions_hash[action] || raise("invalid action #{action} called")
-      
+
       subs_hash = @actions_subs.merge(options)
       subs_hash.each { |k,v| subs_hash[k] = action_gsub(v, subs_hash) if v.kind_of?(String)}
-      
+
       method = action_hash[:method]
       path = action_gsub(action_hash[:path], subs_hash) + options[:query].to_s
       is_feed = action_hash[:feed]
       format = options[:return_format] || action_hash[:format] || :xml
       format = format.constantize unless [:xml, :text].include?(format) || format.kind_of?(Class)
-      
-      
+
       if options[:debug]
         puts "method: #{method}"
         puts "path: #{path}"
@@ -61,35 +60,35 @@ module GoogleAppsApi
         puts "headers: #{options[:headers]}"
         puts "---\n"
       end
-      
+
       response = http_request(method, path, options[:body], options[:headers])
 
       if format == :text
         puts response.body.content if options[:debug]
         return response.body.content
       else
-        begin 
+        begin
           xml = Nokogiri::XML(response.body.content) { |c| c.strict.noent}
 
           test_errors(xml)
           puts xml.to_s if options[:debug]
-          
-                    
+
+
           if format == :xml || !is_feed
             format.kind_of?(Class) ? format.new(:xml => xml) : xml
           else
             entries = entryset(xml.css('feed>entry'), format)
 
-          
+
             while (next_feed = xml.at_css('feed>link[rel=next]'))
               response = http_request(:get, next_feed.attribute("href").to_s, nil, options[:headers])
               xml = Nokogiri::XML(response.body.content) { |c| c.strict}
               entries += entryset(xml.css('feed>entry'),format)
             end
-              
+
             entries
           end
-        
+
 
         rescue Nokogiri::XML::SyntaxError  => e
           puts response.body.content if options[:debug]
@@ -105,21 +104,21 @@ module GoogleAppsApi
 
     def http_request(method, path, body, headers, redirects = 0)
       @hc ||= HTTPClient.new
-      
+
       path_with_gsession = path
-      
+
       if @gsession_id && redirects == 0
         operator = path.include?("?") ? "&" : "?"
         path_with_gsession += "#{operator}gsessionid=#{@gsession_id.to_s}"
       end
-      
+
       response = case method
       when :delete
         @hc.send(method, path_with_gsession, headers)
       else
         @hc.send(method, path_with_gsession, body, headers)
       end
-      
+
       if response.status_code == 302 && (redirects += 1) < 10
         new_loc = response.header["Location"].to_s
         gsession_match = new_loc.match(/gsessionid=([\w\-_]+)/)
@@ -166,13 +165,13 @@ module GoogleAppsApi
     end
 
   end
-  
-  
-  
+
+
+
 
   class Entity
     VALID_ENTITY_TYPES = [:user, :calendar, :domain, :contact]
-    
+
     attr_reader :kind, :id, :domain
     def initialize(*args)
       options = args.extract_options!
@@ -180,39 +179,39 @@ module GoogleAppsApi
       @kind = options.delete(:kind)
       @id = options.delete(:id)
       @domain = options.delete(:domain)
-    
+
       if (kind = options.keys.detect { |k| VALID_ENTITY_TYPES.include?(k.to_sym)})
         @kind = kind.to_s
-      
+
         value = CGI::unescape(options[kind])
-        
+
         if value.include?("@")
           @id, @domain = value.split("@",2)
         else
           @id = value
         end
       end
-      
+
 
       raise(ArgumentError, "Kind and Id must be specified") unless @kind && @id
     end
-    
+
     def id_escaped
       CGI::escape(@id)
     end
-    
+
     def full_id
       @id + (@domain.nil? ? "" : "@" + @domain)
     end
-    
+
     def full_id_escaped
       CGI::escape(full_id)
     end
-    
+
     def qualified_id
       @kind + ":" + full_id
     end
-    
+
     def qualified_id_escaped
       CGI::escape(qualified_id)
     end
@@ -222,20 +221,20 @@ module GoogleAppsApi
       other.kind_of?(Entity) && @kind == other.kind && @id == other.id && @domain == other.domain
     end
   end
-  
+
 	class GDataError < RuntimeError
 		attr_accessor :code, :input, :reason
-		
+
 		def initialize()
 		end
-		
+
 		def to_s
 		  "#{code}: #{reason}"
 		end
-		
+
 		def inspect
 		  "#{code}: #{reason}"
-		  
+
 		end
 	end
 end

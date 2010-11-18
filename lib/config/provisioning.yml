@@ -5,8 +5,9 @@
     :service: apps
     :auth: https://www.google.com
     :feed: https://apps-apis.google.com
-    :path_user: ":feed:/a/feeds/:domain:/user/2.0"    
-    
+    :path_user:  ":feed:/a/feeds/:domain:/user/2.0"
+    :path_group: ":feed:/a/feeds/group/2.0/:domain:"
+
   :action_hash:
     :domain_login:
       :method: :post
@@ -41,3 +42,8 @@
       :method: :put
       :path: ":path_user:/:username:"
       :format: GoogleAppsApi::UserEntity
+
+    :retrieve_groups_for_user:
+      :method: :get
+      :path: ":path_group:/?member=:username:"
+      :format: GoogleAppsApi::GroupEntity
